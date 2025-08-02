@@ -129,7 +129,7 @@ Install via Arduino Library Manager:
 ### Setup Steps
 
 ```
-git clone https://github.com/sadion/esp8266-parola-wifi-matrix.git
+git clone https://github.com/sadion/Parola_.git
 cd esp8266-parola-wifi-matrix
 ```
 
