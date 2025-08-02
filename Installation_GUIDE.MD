@@ -1,484 +1,175 @@
-# ESP8266 WiFi LED Matrix Display
+# Installation Guide
 
-<div align="center">
+## Prerequisites
 
-![Project Status](https://img.shields.io/badge/Status-Active-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-blue)
-![Platform](https://img.shields.io/badge/Platform-ESP8266-orange)
-![Arduino](https://img.shields.io/badge/Arduino-Compatible-blue)
+Before installing this ESP8266 WiFi LED Matrix Display project, ensure you have the following:
 
-**A professional WiFi-controlled LED matrix display system with web interface, OTA updates, and comprehensive security features**
+### Software Requirements
 
-[Features](#-features) â€¢ [Installation](#-installation) â€¢ [Configuration](#-configuration) â€¢ [API](#-api-reference) â€¢ [Contributing](#-contributing)
+1. **Arduino IDE** (version 1.8.0 or later)
+   - Download from [arduino.cc](https://www.arduino.cc/en/software)
+   - Or use **PlatformIO** as an alternative
 
-</div>
+2. **ESP8266 Arduino Core**
+   - Install via Arduino IDE Board Manager
+   - URL: `https://arduino.esp8266.com/stable/package_esp8266com_index.json`
 
-## ðŸ“‹ Table of Contents
+### Hardware Requirements
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Hardware Requirements](#-hardware-requirements)
-- [Installation](#-installation)
-- [Configuration](#-configuration)
-- [Web Interface](#-web-interface)
-- [API Reference](#-api-reference)
-- [Security Features](#-security-features)
-- [Troubleshooting](#-troubleshooting)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Acknowledgments](#-acknowledgments)
+- ESP8266 development board (NodeMCU, Wemos D1 Mini, etc.)
+- LED Matrix display (4x MAX7219/MAX7221 modules)
+- Connecting wires
+- 5V power supply (minimum 2A)
 
-## ðŸŽ¯ Overview
+## Step-by-Step Installation
 
-This project implements a sophisticated WiFi-controlled LED matrix display system using an ESP8266 microcontroller and the MD_Parola library. The system provides a modern web interface for controlling display content, effects, and settings, complete with authentication, over-the-air updates, and robust network management.
+### Step 1: Install Arduino IDE and ESP8266 Core
 
-### Key Highlights
+1. Download and install Arduino IDE
+2. Open Arduino IDE â†’ File â†’ Preferences
+3. Add ESP8266 board manager URL:
+   ```
+   https://arduino.esp8266.com/stable/package_esp8266com_index.json
+   ```
+4. Go to Tools â†’ Board â†’ Boards Manager
+5. Search for "ESP8266" and install the latest version
 
-- **Modern Web Interface**: Responsive design with Material Design icons
-- **Secure Authentication**: Session-based login with rate limiting
-- **Real-time Control**: Live text updates and effect changes
-- **OTA Updates**: Firmware updates via web interface
-- **Network Resilience**: Automatic WiFi reconnection with graceful degradation
-- **Professional UI**: Clean, intuitive control panel with visual feedback
+### Step 2: Install Required Libraries
 
-## âœ¨ Features
-
-### Display Control
-- ðŸ“ **Live Text Updates**: Real-time message changes without page refresh
-- ðŸŽ¨ **28 Visual Effects**: Comprehensive animation library including scroll, fade, wipe, and more
-- ðŸ”† **Brightness Control**: 15 levels of brightness adjustment (1-15)
-- âš¡ **Speed Control**: 10 speed levels for animations (1-10)
-- ðŸ• **Auto Clock Display**: Automatic time display when no custom message is set
-
-### Web Interface
-- ðŸŽ¨ **Modern Design**: Material Design UI with responsive layout
-- ðŸ“± **Mobile Friendly**: Optimized for desktop and mobile devices
-- ðŸ”’ **Secure Login**: Username/password authentication with session management
-- ðŸ‘ï¸ **Real-time Status**: Live updates of time, IP, uptime, and network status
-- ðŸŽ›ï¸ **Interactive Controls**: Slider controls for brightness and speed
-- ðŸŽ¯ **Effect Gallery**: Visual grid of all available text effects
-
-### Security & Management
-- ðŸ›¡ï¸ **Rate Limiting**: Prevents brute force attacks with IP-based blocking
-- ðŸ”‘ **Session Management**: Secure token-based authentication
-- â° **Auto-logout**: 10-minute session timeout for security
-- ðŸ”„ **OTA Updates**: Secure firmware updates via web interface
-- ðŸ“Š **System Monitoring**: Real-time system status and diagnostics
-
-### Network Features
-- ðŸ“¡ **WiFi Management**: Automatic connection with reconnection handling
-- ðŸŒ **NTP Time Sync**: Automatic time synchronization
-- ðŸ“ **Network Discovery**: Displays current IP and network information
-- ðŸ”„ **Graceful Degradation**: Display management during network outages
-
-## ðŸ”§ Hardware Requirements
-
-### Essential Components
-- **ESP8266 Development Board** (NodeMCU, Wemos D1 Mini, etc.)
-- **LED Matrix Display** (4x MAX7219/MAX7221 modules, FC16 compatible)
-- **Connecting Wires** (Dupont/Jumper wires)
-- **Power Supply** (5V, minimum 2A recommended)
-
-### Wiring Connections
-
-| ESP8266 Pin | MAX7219 Pin | Description |
-|-------------|-------------|-------------|
-| D5          | CLK         | Clock Signal |
-| D7          | DIN         | Data Input |
-| D8          | CS          | Chip Select |
-| 3.3V        | VCC         | Power (3.3V) |
-| GND         | GND         | Ground |
-
-### Hardware Configuration
-- **Matrix Type**: FC16_HW (configurable in code)
-- **Matrix Count**: 4 modules (configurable)
-- **Display Size**: 32x8 pixels total (4 modules Ã— 8x8)
-
-## ðŸš€ Installation
-
-### Prerequisites
-1. **Arduino IDE** (version 1.8.0 or later) or **PlatformIO**
-2. **ESP8266 Arduino Core** (latest version)
-3. **Required Libraries** (see Library Dependencies section)
-
-### Library Dependencies
-
-Install the following libraries through Arduino IDE Library Manager:
+Open Arduino IDE and install these libraries via Library Manager:
 
 ```cpp
-// Core Libraries
-#include <ESP8266WiFi.h>           // ESP8266 WiFi support
-#include <ESP8266WebServer.h>      // Web server functionality
-#include <ESP8266HTTPUpdateServer.h> // OTA update server
-#include <ArduinoOTA.h>            // Over-the-air updates
-#include <EEPROM.h>                // Settings persistence
-
-// Display Libraries
-#include <MD_Parola.h>             // Text display and effects
-#include <MD_MAX72XX.h>            // MAX72xx hardware control
-#include <SPI.h>                   // SPI communication
-
-// Time and Network
-#include <NTPClient.h>             // Network time protocol
-#include <WiFiUdp.h>               // UDP communication
+// Required Libraries List
+MD_Parola              // LED matrix text display
+MD_MAX72XX             // MAX72xx hardware control
+NTPClient              // Network time protocol
+ArduinoOTA             // Over-the-air updates
+WiFiManager (optional) // WiFi configuration helper
 ```
 
-### Installation Steps
+**Installation via Library Manager:**
+1. Tools â†’ Manage Libraries
+2. Search for each library name
+3. Click "Install" for each library
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/sadion/esp8266-parola-wifi-matrix.git
-   cd esp8266-parola-wifi-matrix
-   ```
+### Step 3: Hardware Connections
 
-2. **Install Libraries**
-   - Open Arduino IDE
-   - Go to **Tools â†’ Manage Libraries**
-   - Search and install each required library
+Connect your LED matrix to ESP8266:
 
-3. **Configure Hardware**
-   - Connect your LED matrix according to the wiring diagram
-   - Verify all connections are secure
+| ESP8266 Pin | MAX7219 Pin | Wire Color | Description |
+|-------------|-------------|------------|-------------|
+| D5          | CLK         | Yellow     | Clock Signal |
+| D7          | DIN         | Green      | Data Input |
+| D8          | CS          | Blue       | Chip Select |
+| 3.3V        | VCC         | Red        | Power |
+| GND         | GND         | Black      | Ground |
 
-4. **Upload the Code**
-   - Open `parola_matrix.ino` in Arduino IDE
-   - Select your ESP8266 board from **Tools â†’ Board**
-   - Select the correct port from **Tools â†’ Port**
-   - Click **Upload**
+### Step 4: Configure the Code
 
-## âš™ï¸ Configuration
-
-### Network Configuration
-
-Update the following variables in the code:
+1. Download the project files
+2. Open `parola_matrix.ino` in Arduino IDE
+3. Update configuration variables:
 
 ```cpp
-// WiFi Network Credentials
-const char *ssid = "YourWiFiNetwork";        // Your WiFi network name
-const char *password = "YourWiFiPassword";   // Your WiFi password
+// WiFi Configuration
+const char *ssid = "YourWiFiNetwork";
+const char *password = "YourWiFiPassword";
 
 // Admin Credentials
-const char *adminUser = "admin";             // Web interface username
-const char *adminPass = "your_password";     // Web interface password
+const char *adminUser = "admin"; 
+const char *adminPass = "your_secure_password";
 ```
 
-### Display Settings
+### Step 5: Upload the Code
 
-```cpp
-// Hardware Configuration
-#define HARDWARE_TYPE MD_MAX72XX::FC16_HW    // Matrix hardware type
-#define MAX_DEVICES 4                        // Number of matrix modules
-#define CLK_PIN D5                           // Clock pin
-#define DATA_PIN D7                          // Data pin
-#define CS_PIN D8                            // Chip select pin
-```
-#### 🔁 Reset to Default Button
+1. Connect ESP8266 to computer via USB
+2. Select board: Tools â†’ Board â†’ ESP8266 Boards â†’ (your board)
+3. Select port: Tools â†’ Port â†’ (your port)
+4. Click Upload button (arrow icon)
 
-You can reset all settings directly from the web interface using the **Reset** button located in the top-right dashboard header (beside the Logout icon).
+### Step 6: First Boot and Testing
 
-**What the Reset button does:**
-- Clears any saved text message
-- Resets brightness, scroll speed, and display effect to defaults
-- Applies settings immediately
-- Returns display to clock-only mode if no message is set
+1. Open Serial Monitor (9600 baud)
+2. Press reset button on ESP8266
+3. Wait for WiFi connection message
+4. Note the IP address displayed
+5. Open web browser and navigate to the IP address
 
-> 💡 Tip: When the message is empty, the LED matrix switches to show the real-time clock automatically—sourced via NTP.
-
-This makes it easy to restore your device to a known, clean state without needing to reflash firmware or manually clear memory.
-
-## ðŸ–¥ï¸ Web Interface
-
-### Accessing the Interface
-
-1. **Connect to WiFi**: Ensure your ESP8266 is connected to your network
-2. **Find IP Address**: Check your router's admin panel or serial monitor
-3. **Open Browser**: Navigate to `http://[ESP8266_IP_ADDRESS]`
-4. **Login**: Use your configured admin credentials
-
-### Interface Features
-
-#### Dashboard Sections
-
-1. **Status Cards**
-   - Current time with automatic updates
-   - Network information (IP address, SSID)
-   - System uptime since last reboot
-
-2. **Effect Gallery**
-   - Visual grid of all 28 available effects
-   - Click any effect to apply instantly
-   - Icons represent each effect type
-
-3. **Message Control**
-   - Live text input with instant updates
-   - 63-character maximum length
-   - Automatic sanitization of special characters
-
-4. **Brightness & Speed Controls**
-   - Interactive slider controls
-   - Visual feedback with color coding
-   - Instant application of changes
-
-5. **Firmware Update**
-   - Drag-and-drop firmware upload
-   - Progress indication
-   - Automatic reboot after successful update
-
-## ðŸ“¡ API Reference
-
-### Authentication
-
-All API endpoints (except login) require authentication:
-
-```http
-GET /endpoint HTTP/1.1
-Authorization: Bearer [session_token]
-```
-
-### Endpoints
-
-#### Login
-```http
-POST /login
-Content-Type: application/x-www-form-urlencoded
-
-username=admin&password=your_password
-```
-
-**Response:**
-```json
-{
-  "token": "abc123def456"
-}
-```
-
-#### Get Status
-```http
-GET /status
-Authorization: Bearer [token]
-```
-
-**Response:**
-```json
-{
-  "brightness": 5,
-  "speed": 5,
-  "effect": 0,
-  "message": "Hello World",
-  "ip": "192.168.1.100",
-  "curtime": "02:30:PM",
-  "ssid": "MyNetwork",
-  "uptime": "01h 23m 45s"
-}
-```
-
-#### Set Brightness
-```http
-POST /setBright
-Authorization: Bearer [token]
-Content-Type: application/x-www-form-urlencoded
-
-value=10
-```
-
-#### Set Speed
-```http
-POST /setSpeed
-Authorization: Bearer [token]
-Content-Type: application/x-www-form-urlencoded
-
-value=7
-```
-
-#### Set Effect
-```http
-POST /setEffect
-Authorization: Bearer [token]
-Content-Type: application/x-www-form-urlencoded
-
-value=12
-```
-
-#### Set Message
-```http
-POST /setMessage
-Authorization: Bearer [token]
-Content-Type: application/x-www-form-urlencoded
-
-value=Hello%20World
-```
-
-#### Firmware Update
-```http
-POST /update
-Authorization: Bearer [token]
-Content-Type: multipart/form-data
-
-firmware=[binary_file]
-```
-
-### Effect Index Reference
-
-| Index | Effect Name | Description |
-|-------|-------------|-------------|
-| 0 | No Effect | Static text display |
-| 1 | Print | Simple print effect |
-| 2 | Scroll Up | Text scrolls upward |
-| 3 | Scroll Down | Text scrolls downward |
-| 4 | Scroll Left | Text scrolls left |
-| 5 | Scroll Right | Text scrolls right |
-| 6 | Slice | Slicing transition |
-| 7 | Mesh | Mesh pattern effect |
-| 8 | Fade | Fade in/out effect |
-| 9 | Dissolve | Dissolve transition |
-| 10 | Blinds | Venetian blind effect |
-| 11 | Random | Random pattern |
-| 12 | Wipe | Wipe transition |
-| 13 | Wipe Cursor | Wipe with cursor |
-| 14 | Scan Horiz | Horizontal scan |
-| 15 | Scan HorizX | Extended horizontal scan |
-| 16 | Scan Vert | Vertical scan |
-| 17 | Scan VertX | Extended vertical scan |
-| 18 | Opening | Opening curtain |
-| 19 | Opening Cursor | Opening with cursor |
-| 20 | Closing | Closing curtain |
-| 21 | Closing Cursor | Closing with cursor |
-| 22 | Scroll Up Left | Diagonal scroll up-left |
-| 23 | Scroll Up Right | Diagonal scroll up-right |
-| 24 | Scroll Down Left | Diagonal scroll down-left |
-| 25 | Scroll Down Right | Diagonal scroll down-right |
-| 26 | Grow Up | Growing upward |
-| 27 | Grow Down | Growing downward |
-
-## ðŸ” Security Features
-
-### Authentication System
-- **Session-based Authentication**: Secure token generation and validation
-- **Session Timeout**: Automatic logout after 10 minutes of inactivity
-- **Rate Limiting**: Maximum 3 login attempts per IP address
-- **Temporary Blocking**: 30-second block after failed attempts
-
-### Network Security
-- **Input Sanitization**: All user inputs are sanitized to prevent injection
-- **Memory Management**: Automatic cleanup of old login attempt records
-- **Secure Headers**: Proper HTTP headers for security
-
-### Data Protection
-- **EEPROM Storage**: Settings securely stored in non-volatile memory
-- **Network Isolation**: System continues operating during network outages
-- **Graceful Degradation**: Display functions maintained during connectivity issues
-
-## ðŸ”§ Troubleshooting
+## Troubleshooting Installation
 
 ### Common Issues
 
-#### WiFi Connection Problems
-**Symptoms**: Device not connecting to WiFi
-**Solutions**:
-- Verify SSID and password in code
-- Check WiFi signal strength
+**ESP8266 not detected:**
+- Install CH340/CP2102 USB drivers
+- Try different USB cable
+- Check board selection in Arduino IDE
+
+**Library compilation errors:**
+- Ensure all required libraries are installed
+- Update to latest library versions
+- Check for conflicting library versions
+
+**Upload failures:**
+- Press and hold FLASH button during upload
+- Lower upload speed in Tools â†’ Upload Speed
+- Try different USB port
+
+**WiFi connection issues:**
+- Verify SSID and password
 - Ensure 2.4GHz network (ESP8266 doesn't support 5GHz)
-- Try power cycling the device
+- Check signal strength
 
-#### Display Not Working
-**Symptoms**: LED matrix not showing anything
-**Solutions**:
-- Verify wiring connections
-- Check power supply (5V, 2A minimum)
-- Confirm hardware type setting (`HARDWARE_TYPE`)
-- Test with basic MD_Parola examples
+## Alternative Installation Methods
 
-#### Web Interface Not Loading
-**Symptoms**: Cannot access web interface
-**Solutions**:
-- Find correct IP address (check serial monitor)
-- Verify device is on same network
-- Clear browser cache
-- Try different browser
+### PlatformIO Installation
 
-#### Login Issues
-**Symptoms**: Cannot login to web interface
-**Solutions**:
-- Verify admin credentials in code
-- Wait 30 seconds if blocked by rate limiting
-- Check browser developer console for errors
-- Restart device to reset sessions
+1. Install Visual Studio Code
+2. Install PlatformIO extension
+3. Create new project with ESP8266 platform
+4. Add dependencies to `platformio.ini`:
 
-### Debug Mode
-
-Enable debug output by monitoring the serial port at 9600 baud:
-
-```cpp
-Serial.begin(9600);
+```ini
+[env:nodemcuv2]
+platform = espressif8266
+board = nodemcuv2
+framework = arduino
+lib_deps = 
+    majicdesigns/MD_Parola@^3.7.0
+    majicdesigns/MD_MAX72XX@^3.4.0
+    arduino-libraries/NTPClient@^3.2.1
 ```
 
-### Factory Reset
+### Manual Library Installation
 
-To reset all settings to defaults:
-1. Hold the reset button while powering on
-2. Or reflash the firmware
-3. Settings will return to factory defaults
+If Library Manager fails:
 
-## ðŸ¤ Contributing
+1. Download library ZIP files from GitHub
+2. Arduino IDE â†’ Sketch â†’ Include Library â†’ Add .ZIP Library
+3. Select downloaded ZIP files
 
-We welcome contributions to improve this project! Here's how you can help:
+## Verification
 
-### Ways to Contribute
-- ðŸ› **Bug Reports**: Submit issues with detailed descriptions
-- âœ¨ **Feature Requests**: Suggest new functionality
-- ðŸ”§ **Code Contributions**: Submit pull requests with improvements
-- ðŸ“š **Documentation**: Help improve documentation and examples
-- ðŸ§ª **Testing**: Test on different hardware configurations
+After successful installation:
 
-### Development Setup
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+1. **Serial Monitor Output:**
+   ```
+   Connecting to WiFi...
+   WiFi connected. IP: 192.168.1.100
+   Server started
+   ```
 
-### Coding Standards
-- Follow Arduino IDE formatting conventions
-- Use meaningful variable and function names
-- Add comments for complex logic
-- Test on actual hardware before submitting
+2. **LED Matrix Display:**
+   - Shows "Welcome to Parola_" message
+   - Display should be clearly visible
 
-## ðŸ“„ License
+3. **Web Interface:**
+   - Accessible at ESP8266 IP address
+   - Login page should appear
+   - Dashboard loads after authentication
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Next Steps
 
-### MIT License Summary
-- âœ… Commercial use allowed
-- âœ… Modification allowed
-- âœ… Distribution allowed
-- âœ… Private use allowed
-- â— License and copyright notice required
-
-## ðŸ™ Acknowledgments
-
-### Libraries and Frameworks
-- **[MD_Parola](https://github.com/MajicDesigns/MD_Parola)** by MajicDesigns - LED matrix text display library
-- **[MD_MAX72XX](https://github.com/MajicDesigns/MD_MAX72XX)** by MajicDesigns - MAX72xx hardware control
-- **[ESP8266 Arduino Core](https://github.com/esp8266/Arduino)** - ESP8266 Arduino framework
-- **[NTPClient](https://github.com/arduino-libraries/NTPClient)** - Network time synchronization
-
-### Design Resources
-- **[Material Design Icons](https://fonts.google.com/icons)** - UI icons
-- **[Google Fonts](https://fonts.google.com/)** - Typography
-
-### Community
-- Arduino Forum community for support and inspiration
-- ESP8266 developers for the excellent platform
-- Contributors and testers who helped improve this project
-
----
-
-<div align="center">
-
-**Made with ♥️ by [@wordwires](https://github.com/wordwires)**
-
-â­ **Star this repository if you found it helpful!**
-
-[Report Bug](https://github.com/sadion/esp8266-parola-wifi-matrix/issues) â€¢ [Request Feature](https://github.com/sadion/esp8266-parola-wifi-matrix/issues) â€¢ [Discussions](https://github.com/sadion/esp8266-parola-wifi-matrix/discussions)
-
-</div>
+- [Configuration Guide](CONFIGURATION.md)
+- [Web Interface Usage](../README.md#web-interface)
+- [API Documentation](API.md)
+- [Troubleshooting](TROUBLESHOOTING.md)
