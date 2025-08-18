@@ -54,11 +54,13 @@ This project implements a sophisticated WiFi-controlled LED matrix display syste
 
 ### Web Interface
 
-- 🎨 **Modern Design**: Material Design UI
-- 📱 **Mobile Friendly**: Responsive for multiple screen sizes
-- 🔒 **Secure Login**: Authenticated access with session management
-- 👁️ **Live Status**: IP address, uptime, current time, and SSID
-- 🎯 **Interactive Controls**: Effect grid, sliders, input fields
+![Web Interface Preview](https://github.com/sddion/Parola_/2025.png)
+
+- 🎨 **Modern Design**: Material Design UI  
+- 📱 **Mobile Friendly**: Responsive for multiple screen sizes  
+- 🔒 **Secure Login**: Authenticated access with session management  
+- 👁️ **Live Status**: IP address, uptime, current time, and SSID  
+- 🎯 **Interactive Controls**: Effect grid, sliders, input fields  
 - 🔁 **Reset Button**: One-click factory reset
 
 ### Security & Management
