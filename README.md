@@ -54,7 +54,7 @@ This project implements a sophisticated WiFi-controlled LED matrix display syste
 
 ### Web Interface
 
-![Web Interface Preview](https://github.com/sddion/Parola_/2025.png)
+![Web Interface Preview](https://github.com/sddion/Parola_/blob/main/2025.png)
 
 - 🎨 **Modern Design**: Material Design UI  
 - 📱 **Mobile Friendly**: Responsive for multiple screen sizes  
