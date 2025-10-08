@@ -195,6 +195,18 @@ const unsigned long ONE_WEEK_MS = 604800000UL; // 7 days in milliseconds
 String lastClock = "";
 String lastClockUI = "";
 
+String lastTimeStr = "";
+String lastDateStr = "";
+String lastDayStr = "";
+
+bool waitingForEffectFinish = false;
+
+unsigned long lastInfoChange = 0;
+const unsigned long INFO_DISPLAY_MS = 2200;
+
+enum InfoMode { MODE_TIME, MODE_DATE, MODE_DAY };
+InfoMode infoMode = MODE_TIME;
+
 const char index_html[] PROGMEM = "<!DOCTYPE html><html lang='en'><head>"
 "<meta charset='UTF-8'>"
 "<meta name='viewport' content='width=device-width, initial-scale=1'>"
@@ -963,34 +975,37 @@ void cleanupOldIPs() {
 }
 void updateClock() {
   if (timeClient.update()) {
-    time_t epochTime = timeClient.getEpochTime();
-    struct tm *ptm = gmtime((time_t *)&epochTime);
-    
+    time_t rawTime = timeClient.getEpochTime();
+    struct tm *tmInfo = localtime(&rawTime);
+
+    // Day name
+    static const char* daynames[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+    String dayStr = daynames[tmInfo->tm_wday];
+
+    // Date in "DD MMM" format, e.g. "15 JUL"
+    static const char* monthnames[] = {
+    "JAN", "FEB", "MAR", "APR", "MAY", "JUNE",
+    "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"
+    };
+    int mo = tmInfo->tm_mon; 
+    int da = tmInfo->tm_mday;
+    char dateBuf[12];
+    snprintf(dateBuf, sizeof(dateBuf), "%d %s", da, monthnames[mo]);
+
+    // Time in 12h format with AM/PM
     int hr = timeClient.getHours();
     int mn = timeClient.getMinutes();
-    int sec = timeClient.getSeconds();
     char ap = (hr < 12) ? 'A' : 'P';
-    int dhr = hr % 12;
-    if (dhr == 0)
-      dhr = 12;
+    int dhr = hr % 12; if (dhr == 0) dhr = 12;
+    char timeBuf[10];
+    snprintf(timeBuf, sizeof(timeBuf), "%d:%02d %cM", dhr, mn, ap);
+
+    lastDayStr = dayStr;             
+    lastDateStr = String(dateBuf);       
+    lastTimeStr = String(timeBuf);     
     
-    // Day names
-    const char* dayNames[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-    const char* monthNames[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    
-    char tbuf[64];
     char uiBuf[32];
-    
-    // Format: "Mon 25 Dec 12:30:45PM"
-    snprintf(tbuf, sizeof(tbuf), "%s %d %s %d:%02d:%02d%cM", 
-             dayNames[ptm->tm_wday], ptm->tm_mday, monthNames[ptm->tm_mon], 
-             dhr, mn, sec, ap);
-    
-    // Format for UI: "12:30:45PM"
-    snprintf(uiBuf, sizeof(uiBuf), "%d:%02d:%02d%cM", dhr, mn, sec, ap);
-    
-    lastClock = String(tbuf);
+    snprintf(uiBuf, sizeof(uiBuf), "%s, %s %s", dayStr.c_str(), dateBuf, timeBuf);
     lastClockUI = String(uiBuf);
   }
 }
@@ -1000,8 +1015,18 @@ void forceShowDefaultMessage() {
   myDisplay.displayClear();
   myDisplay.setIntensity(map(settings.brightness, 1, 15, 1, 15));
   myDisplay.setSpeed(map(settings.speed, 1, 10, 100, 10));
-  const char * displayText =
-    (msg.length() == 0) ? lastClock.c_str() : settings.message;
+  
+  if (msg.length() == 0) {
+    const char* displayText;
+    if (infoMode == MODE_TIME)      { displayText = lastTimeStr.c_str();      waitingForEffectFinish = true; }
+    else if (infoMode == MODE_DATE) { displayText = lastDateStr.c_str();      waitingForEffectFinish = true; }
+    else                           { displayText = lastDayStr.c_str();       waitingForEffectFinish = true; }
+    
+    myDisplay.setTextBuffer((char*)displayText);
+  } else {
+    myDisplay.setTextBuffer(settings.message);
+  }
+  
   textEffect_t eff =
     effects[settings.effect_idx < NUM_EFFECTS ? settings.effect_idx : 0];
   if (msg.length() == 0) {
@@ -1324,17 +1349,34 @@ void loop() {
     }
   }
   if (!displayDisabled) {
-    if (now - lastNtpSync > 4000 || lastNtpSync == 0) {
+    if (now - lastNtpSync > 40000UL || lastNtpSync == 0) {
       lastNtpSync = now;
       updateClock();
-      String msg = String(settings.message);
-      msg.trim();
-      if (msg.length() == 0) {
-        forceShowDefaultMessage();
-      }
     }
-    if (myDisplay.displayAnimate()) {
-      myDisplay.displayReset();
+    
+    String msg = String(settings.message);
+    msg.trim();
+    if (msg.length() == 0) {
+      if (waitingForEffectFinish) {
+        if (myDisplay.displayAnimate()) {
+          infoMode = static_cast<InfoMode>((infoMode + 1) % 3);
+          lastInfoChange = now;
+          forceShowDefaultMessage();
+        }
+      } else {
+        if (now - lastInfoChange >= INFO_DISPLAY_MS) {
+          infoMode = static_cast<InfoMode>((infoMode + 1) % 3);
+          lastInfoChange = now;
+          forceShowDefaultMessage();
+        }
+        if (myDisplay.displayAnimate()) {
+          myDisplay.displayReset();
+        }
+      }
+    } else {
+      if (myDisplay.displayAnimate()) {
+        myDisplay.displayReset();
+      }
     }
   }
 }
