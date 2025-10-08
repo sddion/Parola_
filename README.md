@@ -149,7 +149,6 @@ Install via Arduino Library Manager:
 
 ```
 git clone https://github.com/sadion/Parola_.git
-cd esp8266-parola-wifi-matrix
 ```
 
 - Open `.ino` in IDE
@@ -325,15 +324,13 @@ Authorization: Bearer your_token_string
 
 | Issue                     | Solution                        |
 |---------------------------|---------------------------------|
-| "Can't access web UI"     | Connect to AP `Parola` → `192.168.4.1` |
-| "Matrix not lighting up"  | Check wiring & HARDWARE_TYPE    |
-| "WiFi not connecting"     | Device auto-switches to AP mode |
-| "Web UI unreachable"      | Try AP mode or check Serial Monitor |
-| "Login blocked"           | Wait 30s timeout & retry         |
-| "Display garbled"         | Reduce speed, check power supply|
-| "Lost WiFi settings"      | Device creates AP `Parola` again |
+| “Matrix not lighting up”  | Check wiring & HARDWARE_TYPE    |
+| “WiFi not connecting”     | Confirm SSID, password           |
+| “Web UI unreachable”      | Confirm IP via Serial Monitor    |
+| “Login blocked”           | Wait 30s timeout & retry         |
+| “Display garbled”         | Reduce speed, check power supply|
 
-**Serial Monitor**: Use `9600` baud for debugging info and IP addresses.
+Use `Serial.begin(9600);` for basic logging.
 
 ## 🙌 Contributing
 
