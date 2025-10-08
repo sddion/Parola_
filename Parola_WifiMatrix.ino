@@ -65,6 +65,10 @@ textEffect_t effects[] = {
   PA_RANDOM,
   PA_WIPE,
   PA_WIPE_CURSOR,
+#define CLK_PIN D5
+#define DATA_PIN D7
+#define CS_PIN D8
+
   PA_SCAN_HORIZ,
   PA_SCAN_HORIZX,
   PA_SCAN_VERT,
@@ -151,7 +155,22 @@ const char * effect_icons[] = {
 #define EEPROM_ADDR_MESSAGE 4
 #define EEPROM_ADDR_WIFI_SSID 68
 #define EEPROM_ADDR_WIFI_PASS 132
+void setup() {
+  Serial.begin(9600);
+  delay(100);
+  EEPROM.begin(EEPROM_SIZE);
+  loadSettingsFromEEPROM();
+  myDisplay.begin();
 
+  // Check if WiFi credentials are set
+  if (strlen(settings.wifi_ssid) > 0 && strcmp(settings.wifi_ssid, "...") != 0) {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(settings.wifi_ssid, settings.wifi_password);
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
+
+    #ifdef ESP8266
+    WiFi.setSleepMode(WIFI_NONE_SLEEP);
 struct Settings {
   uint8_t brightness, speed, effect_idx;
   char message[64];
@@ -160,11 +179,11 @@ struct Settings {
 };
 Settings settings;
 
-const char * ssid = "...";
-const char * password = "...";
+const char * ssid = "Rickroll";
+const char * password = "9bit8MiTnone";
 bool apMode = false;
-const char * adminUser = "...";
-const char * adminPass = "...";
+const char * adminUser = "admin";
+const char * adminPass = "admin@parola";
 ESP8266WebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 60000);
@@ -289,6 +308,7 @@ const char index_html[] PROGMEM = "<!DOCTYPE html><html lang='en'><head>"
 " min-width:0;"
 " min-height:50px;"
 " padding-top:14px;"
+struct LoginAttempt {
 " padding-bottom:10px;"
 " text-align:center;"
 " cursor:pointer;"
@@ -1063,6 +1083,7 @@ bool hasActiveInternet() {
     http.end();
     return (code == 204);
 }
+
 void loadSettingsFromEEPROM() {
   uint8_t b = EEPROM.read(EEPROM_ADDR_BRIGHTNESS);
   uint8_t s = EEPROM.read(EEPROM_ADDR_SPEED);
