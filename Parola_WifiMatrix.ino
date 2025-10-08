@@ -38,6 +38,7 @@
 #include <SPI.h>
 #include <WiFiUdp.h>
 #include <map>
+#include <ESP8266HTTPClient.h>
 
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 #define MAX_DEVICES 4
@@ -146,7 +147,7 @@ const char * effect_icons[] = {
 #define EEPROM_SIZE 256
 #define EEPROM_ADDR_BRIGHTNESS 0
 #define EEPROM_ADDR_SPEED 1
-#define EEPROM_ADDR_EFFECT 2#include <ArduinoOTA.h>
+#define EEPROM_ADDR_EFFECT 2
 #define EEPROM_ADDR_MESSAGE 4
 #define EEPROM_ADDR_WIFI_SSID 68
 #define EEPROM_ADDR_WIFI_PASS 132
@@ -161,7 +162,7 @@ Settings settings;
 
 const char * ssid = "...";
 const char * password = "...";
-bool apMode = false;ii
+bool apMode = false;
 const char * adminUser = "...";
 const char * adminPass = "...";
 ESP8266WebServer server(80);
@@ -1010,32 +1011,22 @@ void updateClock() {
   }
 }
 void forceShowDefaultMessage() {
-  String msg = String(settings.message);
-  msg.trim();
-  myDisplay.displayClear();
-  myDisplay.setIntensity(map(settings.brightness, 1, 15, 1, 15));
-  myDisplay.setSpeed(map(settings.speed, 1, 10, 100, 10));
-  
-  if (msg.length() == 0) {
-    const char* displayText;
-    if (infoMode == MODE_TIME)      { displayText = lastTimeStr.c_str();      waitingForEffectFinish = true; }
-    else if (infoMode == MODE_DATE) { displayText = lastDateStr.c_str();      waitingForEffectFinish = true; }
-    else                           { displayText = lastDayStr.c_str();       waitingForEffectFinish = true; }
-    
-    myDisplay.setTextBuffer((char*)displayText);
-  } else {
-    myDisplay.setTextBuffer(settings.message);
-  }
-  
-  textEffect_t eff =
-    effects[settings.effect_idx < NUM_EFFECTS ? settings.effect_idx : 0];
-  if (msg.length() == 0) {
-    myDisplay.displayText(displayText, PA_CENTER, myDisplay.getSpeed(),
-      1000, eff, eff);
-  } else {
-    myDisplay.displayText(displayText, PA_LEFT, myDisplay.getSpeed(), 0,
-      eff, eff);
-  }
+    String msg = String(settings.message);
+    msg.trim();
+    myDisplay.displayClear();
+    myDisplay.setIntensity(map(settings.brightness, 1, 15, 1, 15));
+    myDisplay.setSpeed(map(settings.speed, 1, 10, 100, 10));
+    textEffect_t eff = effects[settings.effect_idx < NUM_EFFECTS ? settings.effect_idx : 0];
+    if (msg.length() == 0) {
+        const char* displayText;
+        if (infoMode == MODE_TIME)      { displayText = lastTimeStr.c_str();      waitingForEffectFinish = true; }
+        else if (infoMode == MODE_DATE) { displayText = lastDateStr.c_str();      waitingForEffectFinish = true; }
+        else                           { displayText = lastDayStr.c_str();       waitingForEffectFinish = true; }
+        myDisplay.displayText(displayText, PA_CENTER, myDisplay.getSpeed(), 1000, eff, eff);
+    } else {
+        waitingForEffectFinish = false;
+        myDisplay.displayText(settings.message, PA_LEFT, myDisplay.getSpeed(), 0, eff, eff);
+    }
 }
 void applySettings() {
   myDisplay.setIntensity(map(settings.brightness, 1, 15, 1, 15));
@@ -1062,6 +1053,14 @@ void saveSettingsToEEPROM() {
       break;
   }
   EEPROM.commit();
+}
+
+bool hasActiveInternet() {
+    HTTPClient http;
+    http.begin("http://clients3.google.com/generate_204"); 
+    int code = http.GET();
+    http.end();
+    return (code == 204);
 }
 void loadSettingsFromEEPROM() {
   uint8_t b = EEPROM.read(EEPROM_ADDR_BRIGHTNESS);
@@ -1324,27 +1323,40 @@ void loop() {
     lastCleanupTime = millis();
   }
   unsigned long now = millis();
-  if (now - lastWifiCheck > wifiRetryInterval) {
-    lastWifiCheck = now;
-    if (WiFi.status() != WL_CONNECTED) {
-      if (wifiConnected) {
-        Serial.println("WiFi disconnected. Turning off display.");
-        wifiConnected = false;
-        displayDisabled = true;
-        myDisplay.displayClear();
-        myDisplay.displaySuspend(true);
-      }
-      WiFi.disconnect();
-      WiFi.begin(ssid, password);
-    } else {
-      if (!wifiConnected) {
-        Serial.println("WiFi Reconnected.");
-        wifiConnected = true;
-        displayDisabled = false;
-        myDisplay.displayClear();
-        myDisplay.displaySuspend(false);
-        applySettings();
-        updateClock();
+  if (!apMode && !displayDisabled) {
+    // WiFi AND Internet watchdog/reconnect logic
+    static bool internetConnected = true;
+    if (now - lastWifiCheck > wifiRetryInterval) {
+      lastWifiCheck = now;
+      bool wifiOk = (WiFi.status() == WL_CONNECTED);
+      bool inetOk = wifiOk && hasActiveInternet();
+
+      if (!wifiOk || !inetOk) {
+        // If this is a new disconnect/internet-down, deactivate the display
+        if (wifiConnected || internetConnected) {
+          Serial.println("WiFi/Internet lost. Turning off display.");
+          wifiConnected = wifiOk;
+          internetConnected = inetOk;
+          displayDisabled = true;
+          myDisplay.displayClear();
+          myDisplay.displaySuspend(true);
+        }
+        // Try to reconnect WiFi if needed
+        if (!wifiOk) {
+          WiFi.disconnect();
+          WiFi.begin(settings.wifi_ssid, settings.wifi_password);
+        }
+      } else {
+        if (!wifiConnected || !internetConnected) {
+          Serial.println("WiFi/Internet Restored.");
+          wifiConnected = true;
+          internetConnected = true;
+          displayDisabled = false;
+          myDisplay.displayClear();
+          myDisplay.displaySuspend(false);
+          applySettings();
+          updateClock();
+        }
       }
     }
   }
