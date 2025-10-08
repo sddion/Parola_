@@ -1,14 +1,14 @@
 
 /*
  * Parola WiFi Matrix Display Controller
- * 
+ *
  * Author: @dedsec (GitHub)
  * Project: ESP8266 WiFi LED Matrix Display with Web Interface
- * Description: Professional WiFi-controlled LED matrix display system with 
- * 
- * 
+ * Description: Professional WiFi-controlled LED matrix display system with
+ *
+ *
  *              AP mode, web interface, OTA updates, and security features
- * 
+ *
  * Hardware: ESP8266 + 4x MAX7219 LED Matrix Modules
  * Features: - Automatic AP mode when no WiFi configured
  *           - Modern responsive web interface with Material Design
@@ -17,11 +17,11 @@
  *           - Secure authentication with session management
  *           - Over-the-air firmware updates
  *           - EEPROM settings persistence
- * 
+ *
  * Default Access:
  * - AP Mode: Connect to "Parola" network (password: parola123)
  * - Web Interface: http://192.168.4.1 (admin/admin)
- * 
+ *
  * Repository: https://github.com/dedsec/Parola_
  * License: MIT
  */
@@ -163,8 +163,8 @@ Settings settings;
 const char * ssid = "...";
 const char * password = "...";
 bool apMode = false;
-const char * adminUser = "...";
-const char * adminPass = "...";
+const char * adminUser = "admin";
+const char * adminPass = "admin@parola";
 ESP8266WebServer server(80);
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", 19800, 60000);
@@ -988,7 +988,7 @@ void updateClock() {
     "JAN", "FEB", "MAR", "APR", "MAY", "JUNE",
     "JULY", "AUG", "SEP", "OCT", "NOV", "DEC"
     };
-    int mo = tmInfo->tm_mon; 
+    int mo = tmInfo->tm_mon;
     int da = tmInfo->tm_mday;
     char dateBuf[12];
     snprintf(dateBuf, sizeof(dateBuf), "%d %s", da, monthnames[mo]);
@@ -1001,10 +1001,10 @@ void updateClock() {
     char timeBuf[10];
     snprintf(timeBuf, sizeof(timeBuf), "%d:%02d %cM", dhr, mn, ap);
 
-    lastDayStr = dayStr;             
-    lastDateStr = String(dateBuf);       
-    lastTimeStr = String(timeBuf);     
-    
+    lastDayStr = dayStr;
+    lastDateStr = String(dateBuf);
+    lastTimeStr = String(timeBuf);
+
     char uiBuf[32];
     snprintf(uiBuf, sizeof(uiBuf), "%s, %s %s", dayStr.c_str(), dateBuf, timeBuf);
     lastClockUI = String(uiBuf);
@@ -1058,7 +1058,7 @@ void saveSettingsToEEPROM() {
 bool hasActiveInternet() {
     WiFiClient client;
     HTTPClient http;
-    http.begin(client, "http://clients3.google.com/generate_204"); 
+    http.begin(client, "http://clients3.google.com/generate_204");
     int code = http.GET();
     http.end();
     return (code == 204);
@@ -1076,22 +1076,23 @@ void loadSettingsFromEEPROM() {
   for (uint8_t i = 0; i < sizeof(settings.message); i++)
     settings.message[i] = EEPROM.read(EEPROM_ADDR_MESSAGE + i);
   settings.message[sizeof(settings.message) - 1] = '\0';
-  
+
   // Load WiFi credentials
   for (uint8_t i = 0; i < sizeof(settings.wifi_ssid); i++)
     settings.wifi_ssid[i] = EEPROM.read(EEPROM_ADDR_WIFI_SSID + i);
   settings.wifi_ssid[sizeof(settings.wifi_ssid) - 1] = '\0';
-  
+
   for (uint8_t i = 0; i < sizeof(settings.wifi_password); i++)
     settings.wifi_password[i] = EEPROM.read(EEPROM_ADDR_WIFI_PASS + i);
   settings.wifi_password[sizeof(settings.wifi_password) - 1] = '\0';
-  
-  // Initialize with defaults if empty
-  if (strlen(settings.wifi_ssid) == 0) {
-    strcpy(settings.wifi_ssid, "...");
+
+  // Don't overwrite empty EEPROM with defaults - leave empty to preserve saved credentials
+  // Only set to empty string if EEPROM contains garbage (0xFF) 
+  if (settings.wifi_ssid[0] == 0xFF) {
+    settings.wifi_ssid[0] = '\0';
   }
-  if (strlen(settings.wifi_password) == 0) {
-    strcpy(settings.wifi_password, "...");
+  if (settings.wifi_password[0] == 0xFF) {
+    settings.wifi_password[0] = '\0';
   }
 }
 void setup() {
@@ -1104,7 +1105,7 @@ void setup() {
   // Check if saved WiFi credentials are valid and different from defaults
   const char* connectSSID = ssid;
   const char* connectPassword = password;
-  
+
   if (strlen(settings.wifi_ssid) > 0 && strcmp(settings.wifi_ssid, "...") != 0) {
     connectSSID = settings.wifi_ssid;
     connectPassword = settings.wifi_password;
@@ -1290,7 +1291,7 @@ void setup() {
     if (server.hasArg("ssid")) {
       String newSSID = server.arg("ssid");
       String newPassword = server.arg("password");
-      
+
       if (newSSID.length() > 0 && newSSID.length() < 64) {
         newSSID.toCharArray(settings.wifi_ssid, 64);
         newPassword.toCharArray(settings.wifi_password, 64);
@@ -1382,7 +1383,7 @@ void loop() {
       lastNtpSync = now;
       updateClock();
     }
-    
+
     String msg = String(settings.message);
     msg.trim();
     if (msg.length() == 0) {
