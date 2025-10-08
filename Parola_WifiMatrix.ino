@@ -1056,8 +1056,9 @@ void saveSettingsToEEPROM() {
 }
 
 bool hasActiveInternet() {
+    WiFiClient client;
     HTTPClient http;
-    http.begin("http://clients3.google.com/generate_204"); 
+    http.begin(client, "http://clients3.google.com/generate_204"); 
     int code = http.GET();
     http.end();
     return (code == 204);
