@@ -1,9 +1,36 @@
+
+/*
+ * Parola WiFi Matrix Display Controller
+ * 
+ * Author: @dedsec (GitHub)
+ * Project: ESP8266 WiFi LED Matrix Display with Web Interface
+ * Description: Professional WiFi-controlled LED matrix display system with 
+ *              AP mode, web interface, OTA updates, and security features
+ * 
+ * Hardware: ESP8266 + 4x MAX7219 LED Matrix Modules
+ * Features: - Automatic AP mode when no WiFi configured
+ *           - Modern responsive web interface with Material Design
+ *           - 28 visual effects and animations
+ *           - Real-time clock display with NTP sync
+ *           - Secure authentication with session management
+ *           - Over-the-air firmware updates
+ *           - EEPROM settings persistence
+ * 
+ * Default Access:
+ * - AP Mode: Connect to "Parola" network (password: parola123)
+ * - Web Interface: http://192.168.4.1 (admin/admin)
+ * 
+ * Repository: https://github.com/dedsec/Parola_
+ * License: MIT
+ */
+
 #include <ArduinoOTA.h>
 #include <EEPROM.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <MD_MAX72xx.h>
+#include <ArduinoOTA.h>
 #include <MD_Parola.h>
 #include <NTPClient.h>
 #include <SPI.h>
@@ -117,7 +144,7 @@ const char * effect_icons[] = {
 #define EEPROM_SIZE 256
 #define EEPROM_ADDR_BRIGHTNESS 0
 #define EEPROM_ADDR_SPEED 1
-#define EEPROM_ADDR_EFFECT 2
+#define EEPROM_ADDR_EFFECT 2#include <ArduinoOTA.h>
 #define EEPROM_ADDR_MESSAGE 4
 #define EEPROM_ADDR_WIFI_SSID 68
 #define EEPROM_ADDR_WIFI_PASS 132
@@ -132,7 +159,7 @@ Settings settings;
 
 const char * ssid = "...";
 const char * password = "...";
-bool apMode = false;
+bool apMode = false;ii
 const char * adminUser = "...";
 const char * adminPass = "...";
 ESP8266WebServer server(80);
@@ -211,7 +238,8 @@ const char index_html[] PROGMEM = "<!DOCTYPE html><html lang='en'><head>"
 "18px #0f1b299c;"
 "padding:21px 25px 17px "
 "23px;position:relative;display:flex;flex-direction:column;justify-content:"
-"center;align-items:flex-start;min-height:80px;width:100%;box-sizing:"
+"center;align-items:flex-start;"
+"min-height:80px;width:100%;box-sizing:"
 "border-box;margin-bottom:0;}"
 ".icon-top-right{position:absolute;top:18px;right:22px;font-size:1.34em;"
 "color:#fff;opacity:.92;}"
