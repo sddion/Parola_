@@ -1101,10 +1101,26 @@ void setup() {
   loadSettingsFromEEPROM();
   myDisplay.begin();
 
-  // Check if WiFi credentials are set
+  // Check if saved WiFi credentials are valid and different from defaults
+  const char* connectSSID = ssid;
+  const char* connectPassword = password;
+  
   if (strlen(settings.wifi_ssid) > 0 && strcmp(settings.wifi_ssid, "...") != 0) {
+    connectSSID = settings.wifi_ssid;
+    connectPassword = settings.wifi_password;
+    Serial.print("Using saved WiFi credentials: ");
+    Serial.println(connectSSID);
+  } else if (strcmp(ssid, "...") != 0) {
+    Serial.print("Using default WiFi credentials: ");
+    Serial.println(connectSSID);
+  } else {
+    Serial.println("No WiFi credentials available. Starting AP mode.");
+    apMode = true;
+  }
+
+  if (!apMode) {
     WiFi.mode(WIFI_STA);
-    WiFi.begin(settings.wifi_ssid, settings.wifi_password);
+    WiFi.begin(connectSSID, connectPassword);
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
 
@@ -1113,8 +1129,7 @@ void setup() {
     #endif
 
     unsigned long startAttemptTime = millis();
-    Serial.print("Connecting to WiFi: ");
-    Serial.println(settings.wifi_ssid);
+    Serial.print("Connecting to WiFi");
 
     while (WiFi.status() != WL_CONNECTED &&
       millis() - startAttemptTime < 20000) {
@@ -1127,9 +1142,6 @@ void setup() {
       Serial.println("\nWiFi connection failed. Starting AP mode.");
       apMode = true;
     }
-  } else {
-    Serial.println("No WiFi credentials set. Starting AP mode.");
-    apMode = true;
   }
 
   if (apMode) {
@@ -1139,7 +1151,9 @@ void setup() {
     Serial.println(WiFi.softAPIP());
   }
 
-  Serial.println("\nWiFi connected. IP: " + WiFi.localIP().toString());
+  if (!apMode) {
+    Serial.println("\nWiFi connected. IP: " + WiFi.localIP().toString());
+  }
   ArduinoOTA.setHostname("Parola_");
   ArduinoOTA.begin();
   timeClient.begin();
@@ -1345,7 +1359,9 @@ void loop() {
         // Try to reconnect WiFi if needed
         if (!wifiOk) {
           WiFi.disconnect();
-          WiFi.begin(settings.wifi_ssid, settings.wifi_password);
+          const char* reconnectSSID = (strlen(settings.wifi_ssid) > 0 && strcmp(settings.wifi_ssid, "...") != 0) ? settings.wifi_ssid : ssid;
+          const char* reconnectPassword = (strlen(settings.wifi_ssid) > 0 && strcmp(settings.wifi_ssid, "...") != 0) ? settings.wifi_password : password;
+          WiFi.begin(reconnectSSID, reconnectPassword);
         }
       } else {
         if (!wifiConnected || !internetConnected) {
