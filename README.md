@@ -36,7 +36,7 @@ This project implements a sophisticated WiFi-controlled LED matrix display syste
 ### Key Highlights
 
 - **AP Mode Support**: Automatic Access Point mode when no WiFi configured
-- **WiFi Configuration**: Easy WiFi setup through web interface  
+- **WiFi Configuration**: Easy WiFi setup through web interface
 - **Modern Web Interface**: Responsive design with Material Design icons
 - **Secure Authentication**: Session-based login with rate limiting
 - **Real-time Control**: Live text updates and effect changes
@@ -58,11 +58,11 @@ This project implements a sophisticated WiFi-controlled LED matrix display syste
 
 ![Web Interface Preview](https://github.com/sddion/Parola_/blob/main/2025.png)
 
-- 🎨 **Modern Design**: Material Design UI  
-- 📱 **Mobile Friendly**: Responsive for multiple screen sizes  
-- 🔒 **Secure Login**: Authenticated access with session management  
-- 👁️ **Live Status**: IP address, uptime, current time, and SSID  
-- 🎯 **Interactive Controls**: Effect grid, sliders, input fields  
+- 🎨 **Modern Design**: Material Design UI
+- 📱 **Mobile Friendly**: Responsive for multiple screen sizes
+- 🔒 **Secure Login**: Authenticated access with session management
+- 👁️ **Live Status**: IP address, uptime, current time, and SSID
+- 🎯 **Interactive Controls**: Effect grid, sliders, input fields
 - 🔁 **Reset Button**: One-click factory reset
 
 ### Security & Management
@@ -166,14 +166,14 @@ When first powered on or if WiFi credentials are not set:
 3. **Open web browser**: Navigate to `http://192.168.4.1`
 4. **Login**: Use default credentials
    - **Username**: `admin`
-   - **Password**: `admin`
+   - **Password**: `admin@parola`
 5. **Configure WiFi**: Use the WiFi Configuration section to set your network
 6. **Device restarts**: Automatically connects to your WiFi network
 
 ### Default Credentials
 
-- **WiFi AP**: `Parola` / `parola123` 
-- **Web Login**: `admin` / `admin`
+- **WiFi AP**: `Parola` / `parola123`
+- **Web Login**: `admin` / `admin@parola`
 - **AP Mode IP**: `192.168.4.1`
 
 ### Manual Configuration (Development)
@@ -222,7 +222,7 @@ A built-in **Reset** button is located in the web dashboard (top-right corner be
 3. Login with `admin` / `admin`
 4. Configure your WiFi in the WiFi Configuration section
 
-#### Normal Operation  
+#### Normal Operation
 1. Open device IP in browser (shown on your router's connected devices)
 2. Login with web credentials (`admin` / `admin`)
 3. Use dashboard controls to update message, change effects, or reset
@@ -354,8 +354,8 @@ We welcome PRs & community feedback!
 
 Licensed under MIT.
 
-✔ Free for commercial or personal use  
-✔ Modify and fork as needed  
+✔ Free for commercial or personal use
+✔ Modify and fork as needed
 🚫 Must retain license notice
 
 ## 🙏 Acknowledgments
@@ -368,7 +368,7 @@ Licensed under MIT.
 
 <div align="center">
 
-Made with ❤️ by [@wordwires](https://github.com/wordwires)  
+Made with ❤️ by [@wordwires](https://github.com/wordwires)
 ⭐ Star this repo if it helped you!
 
 [🐛 Report Bug](https://github.com/sadion/esp8266-parola-wifi-matrix/issues) • [💡 Request Feature](https://github.com/sadion/esp8266-parola-wifi-matrix/issues) • [💬 Discussions](https://github.com/sadion/esp8266-parola-wifi-matrix/discussions)
