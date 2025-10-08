@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>Parola Matrix</title>
+    <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
+    <link rel='stylesheet' href='/styles.css'>
+</head>
+<body>
+    <div id='login-modal'>
+        <form id='login-pop' autocomplete='off'>
+            <span id='login-icon' class='material-icons'>shield</span>
+            <span class='login-main'>Secure Access</span>
+            <div class='login-note'>Enter credentials to control the matrix</div>
+            <div class='login-box-group'>
+                <input class='login-input' id='login-user' type='text' placeholder='Username' autocomplete='username' required>
+                <div class='pw-container'>
+                    <input class='login-input' id='login-pw' type='password' placeholder='Password' autocomplete='current-password' required>
+                    <span id='pweye' class='material-icons'>visibility</span>
+                </div>
+                <button id='btn-login' type='submit'>Access Dashboard</button>
+            </div>
+            <div id='errbox'></div>
+        </form>
+    </div>
+
+    <div class='mainwrap'>
+        <div class='brandcard'>
+            <div class='logoicon'>
+                <span class='material-icons'>hub</span>
+            </div>
+            <div style='flex:1 1 0%;'>
+                <div class='brandtxt'>Parola Matrix</div>
+                <div class='subtitle'>LED Matrix WiFi Display</div>
+            </div>
+            <button class='logout-ico' id='reset-button' title='Reset Settings'>
+                <span class='material-icons'>restart_alt</span>
+            </button>
+            <button class='logout-ico' id='logout-link' title='Logout'>
+                <span class='material-icons'>logout</span>
+            </button>
+        </div>
+
+        <div class='dashboard-row'>
+            <div class='info-section'>
+                <div class='info-card-wide'>
+                    <span class='icon-top-right material-icons'>schedule</span>
+                    <span class='info-title-modern'> State </span>
+                    <span class='info-value-modern' id='curtime'>--:--:--</span>
+                    <span class='info-desc-modern' id='ssid'>&nbsp;</span>
+                </div>
+                <div class='info-card-wide'>
+                    <span class='icon-top-right material-icons'>wifi</span>
+                    <span class='info-title-modern'>Network</span>
+                    <span class='info-value-modern' id='ip'>-</span>
+                    <span class='info-desc-modern'>Device IP Address</span>
+                </div>
+                <div class='info-card-wide'>
+                    <span class='icon-top-right material-icons'>timelapse</span>
+                    <span class='info-title-modern'>Uptime</span>
+                    <span class='info-value-modern' id='uptime'>--</span>
+                    <span class='info-desc-modern'>Since last reboot</span>
+                </div>
+                <div class='card effectcd'>
+                    <div class='fx-gallery' id='fxgallery'></div>
+                </div>
+            </div>
+
+            <div class='main-controls'>
+                <div class='wifi-section' id='wifiSection' style='display:none;'>
+                    <div class='wifi-title'>
+                        <i class='material-icons'>wifi</i>
+                        WiFi Configuration
+                    </div>
+                    <input class='wifi-input' id='wifiSsid' type='text' placeholder='WiFi Network Name (SSID)' maxlength='63'>
+                    <input class='wifi-input' id='wifiPassword' type='password' placeholder='WiFi Password' maxlength='63'>
+                    <button class='wifi-btn' onclick='saveWifi()'>Save WiFi & Restart</button>
+                    <div class='wifi-status' id='wifiStatus'>Checking status...</div>
+                </div>
+
+                <div class='card message'>
+                    <div class='msgsection'>
+                        <div class='msg-label'>Display Text</div>
+                        <input class='msg-inp' id='msg' type='text' maxlength='63' autocomplete='off' placeholder='Enter your message...'>
+                    </div>
+                </div>
+
+                <div class='pill-sliders'>
+                    <div class='pill-group' id='bright-group'>
+                        <div class='pill-label'>Brightness</div>
+                        <div class='pill-slider-wrap' id='bright-slider'>
+                            <i class='material-icons pill-icon'>wb_sunny</i>
+                            <div class='pill-slider-bar'>
+                                <div class='pill-fill' id='bright-fill'></div>
+                                <span class='pill-value' id='brightval'>5</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='pill-group' id='speed-group'>
+                        <div class='pill-label'>Speed</div>
+                        <div class='pill-slider-wrap' id='speed-slider'>
+                            <i class='material-icons pill-icon'>speed</i>
+                            <div class='pill-slider-bar'>
+                                <div class='pill-fill' id='speed-fill'></div>
+                                <span class='pill-value' id='speedval'>5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class='firmware-card'>
+                    <div class='fw-title-row'>
+                        <span class='fw-title-text'>Firmware Update</span>
+                        <span class='fw-icon material-icons'>cloud_upload</span>
+                    </div>
+                    <form id='otaForm' enctype='multipart/form-data' style='width:100%;margin:0;'>
+                        <div class='fw-btn-row'>
+                            <button type='button' id='otaBtn'>
+                                <i class='material-icons' style='vertical-align:middle;margin-right:0;'>cloud_upload</i>Choose File
+                            </button>
+                        </div>
+                        <div class='fw-uploadbox'>
+                            <div class='fw-bar-bg'>
+                                <div class='fw-bar-prg' id='fwBarPrg'></div>
+                                <div class='fw-bar-text' id='fwBarText'>0%</div>
+                            </div>
+                            <div class='fw-log' id='fwLog'>&nbsp;</div>
+                        </div>
+                        <input type='file' id='binFile' name='firmware' accept='.bin' />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class='footer-custom'>
+        Made with <span class="heart-emoji">&#9829;&#65039;</span> by @wordwires
+    </div>
+    <div class='toast' id='toast'></div>
+
+    <script src='/app.js'></script>
+</body>
+</html>
