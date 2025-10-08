@@ -76,8 +76,8 @@ const char *ssid = "YourWiFiNetwork";
 const char *password = "YourWiFiPassword";
 
 // Admin Credentials
-const char *adminUser = "admin"; 
-const char *adminPass = "your_secure_password";
+const char *adminUser = "admin";
+const char *adminPass = "admin@parola";
 ```
 
 ### Step 5: Upload the Code
@@ -133,7 +133,7 @@ const char *adminPass = "your_secure_password";
 platform = espressif8266
 board = nodemcuv2
 framework = arduino
-lib_deps = 
+lib_deps =
     majicdesigns/MD_Parola@^3.7.0
     majicdesigns/MD_MAX72XX@^3.4.0
     arduino-libraries/NTPClient@^3.2.1
@@ -159,17 +159,10 @@ After successful installation:
    ```
 
 2. **LED Matrix Display:**
-   - Shows "Welcome to Parola_" message
+   - Shows "Time/Date/Day" message
    - Display should be clearly visible
 
 3. **Web Interface:**
    - Accessible at ESP8266 IP address
    - Login page should appear
    - Dashboard loads after authentication
-
-## Next Steps
-
-- [Configuration Guide](CONFIGURATION.md)
-- [Web Interface Usage](../README.md#web-interface)
-- [API Documentation](API.md)
-- [Troubleshooting](TROUBLESHOOTING.md)
