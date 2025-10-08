@@ -35,6 +35,8 @@ This project implements a sophisticated WiFi-controlled LED matrix display syste
 
 ### Key Highlights
 
+- **AP Mode Support**: Automatic Access Point mode when no WiFi configured
+- **WiFi Configuration**: Easy WiFi setup through web interface  
 - **Modern Web Interface**: Responsive design with Material Design icons
 - **Secure Authentication**: Session-based login with rate limiting
 - **Real-time Control**: Live text updates and effect changes
@@ -73,7 +75,9 @@ This project implements a sophisticated WiFi-controlled LED matrix display syste
 
 ### Network Features
 
+- 🏠 **Access Point Mode**: Automatic AP mode when no WiFi configured
 - 📶 **Auto WiFi Reconnect**: Resumes stable operation after drops
+- ⚙️ **WiFi Configuration**: Set WiFi credentials through web interface
 - 🌐 **NTP Clock Sync**: Accurate time from online servers
 - 🔍 **IP Reporting**: Visible on dashboard
 - 🧩 **Fail-safe Display Suspension**: Clears matrix when disconnected
@@ -105,13 +109,26 @@ This project implements a sophisticated WiFi-controlled LED matrix display syste
 
 ## 🚀 Installation
 
-### Requirements
+### Quick Installation (Pre-compiled Binary)
+
+For quick setup, you can flash the pre-compiled binary:
+
+1. **Download ESP Flash Tool** or use **esptool.py**
+2. **Use the provided binary**: `esp8266.esp8266.nodemcuv2/sketch_oct08_parola.ino.bin`
+3. **Flash command**:
+   ```bash
+   esptool.py --port COM3 --baud 460800 write_flash --flash_size=detect 0 sketch_oct08_parola.ino.bin
+   ```
+
+### Development Installation
+
+#### Requirements
 
 - Arduino IDE 1.8+ / PlatformIO
 - Installed ESP8266 Board Package
 - Required Libraries
 
-### Required Libraries
+#### Required Libraries
 
 Install via Arduino Library Manager:
 
@@ -141,16 +158,35 @@ cd esp8266-parola-wifi-matrix
 
 ## ⚙️ Configuration
 
-### WiFi Credentials
+### First Time Setup (AP Mode)
 
-Edit in `settings` section:
+When first powered on or if WiFi credentials are not set:
 
-```
+1. **Device creates WiFi network**: `Parola` (Password: `parola123`)
+2. **Connect to AP**: Join the "Parola" network from your device
+3. **Open web browser**: Navigate to `http://192.168.4.1`
+4. **Login**: Use default credentials
+   - **Username**: `admin`
+   - **Password**: `admin`
+5. **Configure WiFi**: Use the WiFi Configuration section to set your network
+6. **Device restarts**: Automatically connects to your WiFi network
+
+### Default Credentials
+
+- **WiFi AP**: `Parola` / `parola123` 
+- **Web Login**: `admin` / `admin`
+- **AP Mode IP**: `192.168.4.1`
+
+### Manual Configuration (Development)
+
+Edit in source code if compiling yourself:
+
+```cpp
 const char* ssid = "YourNetwork";
 const char* password = "YourPassword";
 
 const char* adminUser = "admin";
-const char* adminPass = "admin123";
+const char* adminPass = "admin";
 ```
 
 ### Display Setup
@@ -179,22 +215,34 @@ A built-in **Reset** button is located in the web dashboard (top-right corner be
 
 ## 🖥️ Web Interface
 
-### Guide
+### Access Guide
 
-- Open device IP in browser
-- Login with web credentials
-- Use dashboard controls to update message, change effects, or reset
+#### First Time (AP Mode)
+1. Connect to WiFi network `Parola` (password: `parola123`)
+2. Open `http://192.168.4.1` in browser
+3. Login with `admin` / `admin`
+4. Configure your WiFi in the WiFi Configuration section
 
-### Sections
+#### Normal Operation  
+1. Open device IP in browser (shown on your router's connected devices)
+2. Login with web credentials (`admin` / `admin`)
+3. Use dashboard controls to update message, change effects, or reset
 
-- **Status Cards**: Time, Uptime, IP, SSID
-- **Effect Gallery**: 28 visual animations
+### Dashboard Sections
+
+- **Status Cards**: Time, Uptime, IP, SSID, Connection Mode
+- **WiFi Configuration**: Set WiFi credentials (visible in AP mode or when needed)
+- **Effect Gallery**: 28 visual animations with Material Icons
 - **Sliders**: Brightness (1–15), Speed (1–10)
-- **Message Input**: Real-time text (max 63 chars)
-- **OTA Updater**: Upload and replace firmware
+- **Message Input**: Real-time text updates (max 63 chars)
+- **OTA Updater**: Upload and replace firmware (.bin files)
 - **Reset Button**: One-click restore to default settings
 
 ## 📡 API Reference
+
+**Base URLs:**
+- AP Mode: `http://192.168.4.1`
+- WiFi Mode: `http://[device-ip]`
 
 All API calls require a valid token:
 
@@ -223,14 +271,15 @@ Authorization: Bearer your_token_string
 
 ### Endpoints
 
-| Endpoint       | Method | Description          |
-|----------------|--------|----------------------|
-| `/status`      | GET    | Fetch current settings |
-| `/setBright`   | POST   | Set brightness         |
-| `/setSpeed`    | POST   | Set animation speed    |
-| `/setEffect`   | POST   | Select effect          |
-| `/setMessage`  | POST   | Update display text    |
-| `/update`      | POST   | Upload OTA firmware    |
+| Endpoint       | Method | Description              |
+|----------------|--------|--------------------------|
+| `/status`      | GET    | Fetch current settings   |
+| `/setWifi`     | POST   | Configure WiFi (restarts)|
+| `/setBright`   | POST   | Set brightness           |
+| `/setSpeed`    | POST   | Set animation speed      |
+| `/setEffect`   | POST   | Select effect            |
+| `/setMessage`  | POST   | Update display text      |
+| `/update`      | POST   | Upload OTA firmware      |
 
 ## 🎨 Effect Indexes
 
@@ -276,13 +325,15 @@ Authorization: Bearer your_token_string
 
 | Issue                     | Solution                        |
 |---------------------------|---------------------------------|
-| “Matrix not lighting up”  | Check wiring & HARDWARE_TYPE    |
-| “WiFi not connecting”     | Confirm SSID, password           |
-| “Web UI unreachable”      | Confirm IP via Serial Monitor    |
-| “Login blocked”           | Wait 30s timeout & retry         |
-| “Display garbled”         | Reduce speed, check power supply|
+| "Can't access web UI"     | Connect to AP `Parola` → `192.168.4.1` |
+| "Matrix not lighting up"  | Check wiring & HARDWARE_TYPE    |
+| "WiFi not connecting"     | Device auto-switches to AP mode |
+| "Web UI unreachable"      | Try AP mode or check Serial Monitor |
+| "Login blocked"           | Wait 30s timeout & retry         |
+| "Display garbled"         | Reduce speed, check power supply|
+| "Lost WiFi settings"      | Device creates AP `Parola` again |
 
-Use `Serial.begin(9600);` for basic logging.
+**Serial Monitor**: Use `9600` baud for debugging info and IP addresses.
 
 ## 🙌 Contributing
 
