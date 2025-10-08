@@ -5,6 +5,8 @@
  * Author: @dedsec (GitHub)
  * Project: ESP8266 WiFi LED Matrix Display with Web Interface
  * Description: Professional WiFi-controlled LED matrix display system with 
+ * 
+ * 
  *              AP mode, web interface, OTA updates, and security features
  * 
  * Hardware: ESP8266 + 4x MAX7219 LED Matrix Modules
@@ -961,16 +963,33 @@ void cleanupOldIPs() {
 }
 void updateClock() {
   if (timeClient.update()) {
+    time_t epochTime = timeClient.getEpochTime();
+    struct tm *ptm = gmtime((time_t *)&epochTime);
+    
     int hr = timeClient.getHours();
     int mn = timeClient.getMinutes();
+    int sec = timeClient.getSeconds();
     char ap = (hr < 12) ? 'A' : 'P';
     int dhr = hr % 12;
     if (dhr == 0)
       dhr = 12;
-    char tbuf[10];
-    snprintf(tbuf, sizeof(tbuf), "%d:%02d:%cM", dhr, mn, ap);
-    char uiBuf[10];
-    snprintf(uiBuf, sizeof(uiBuf), "%02d:%02d:%cM", dhr, mn, ap);
+    
+    // Day names
+    const char* dayNames[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+    const char* monthNames[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    
+    char tbuf[64];
+    char uiBuf[32];
+    
+    // Format: "Mon 25 Dec 12:30:45PM"
+    snprintf(tbuf, sizeof(tbuf), "%s %d %s %d:%02d:%02d%cM", 
+             dayNames[ptm->tm_wday], ptm->tm_mday, monthNames[ptm->tm_mon], 
+             dhr, mn, sec, ap);
+    
+    // Format for UI: "12:30:45PM"
+    snprintf(uiBuf, sizeof(uiBuf), "%d:%02d:%02d%cM", dhr, mn, sec, ap);
+    
     lastClock = String(tbuf);
     lastClockUI = String(uiBuf);
   }
