@@ -52,7 +52,26 @@ WiFiManager (optional) // WiFi configuration helper
 2. Search for each library name
 3. Click "Install" for each library
 
-### Step 3: Hardware Connections
+### Step 3: Install LittleFS Upload Plugin
+
+This project requires web files (HTML, CSS, JavaScript) to be uploaded to the ESP8266's filesystem.
+
+1. **Download the LittleFS Upload Plugin:**
+   - Go to: https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases
+   - Download the latest `.zip` file
+
+2. **Install the plugin:**
+   ```bash
+   # Create tools directory if it doesn't exist
+   mkdir -p ~/Arduino/tools/
+   
+   # Extract the downloaded zip to this location
+   unzip ESP8266LittleFS-*.zip -d ~/Arduino/tools/
+   ```
+
+3. **Restart Arduino IDE**
+
+### Step 4: Hardware Connections
 
 Connect your LED matrix to ESP8266:
 
@@ -64,7 +83,7 @@ Connect your LED matrix to ESP8266:
 | 3.3V        | VCC         | Red        | Power |
 | GND         | GND         | Black      | Ground |
 
-### Step 4: Configure the Code
+### Step 5: Configure the Code
 
 1. Download the project files
 2. Open `parola_matrix.ino` in Arduino IDE
@@ -80,20 +99,52 @@ const char *adminUser = "admin";
 const char *adminPass = "your_secure_password";
 ```
 
-### Step 5: Upload the Code
+### Step 6: Upload Web Files to Filesystem
+
+**IMPORTANT:** Upload these files BEFORE uploading the sketch code.
+
+1. Open `Parola_WifiMatrix.ino` in Arduino IDE
+2. Connect your ESP8266 via USB
+3. Configure filesystem size:
+   - **Tools** → **Flash Size** → Select size with FS (e.g., "4MB (FS:2MB OTA:~1019KB)")
+4. Upload data files:
+   - **Tools** → **ESP8266 LittleFS Data Upload**
+5. Wait for "LittleFS Image Uploaded" message
+
+**Files being uploaded from `data/` folder:**
+- `index.html` - Main web interface
+- `styles.css` - All CSS styles  
+- `app.js` - JavaScript functionality
+
+### Step 7: Upload the Sketch Code
 
 1. Connect ESP8266 to computer via USB
 2. Select board: Tools â†’ Board â†’ ESP8266 Boards â†’ (your board)
 3. Select port: Tools â†’ Port â†’ (your port)
 4. Click Upload button (arrow icon)
 
-### Step 6: First Boot and Testing
+### Step 8: First Boot and Testing
 
 1. Open Serial Monitor (9600 baud)
 2. Press reset button on ESP8266
 3. Wait for WiFi connection message
 4. Note the IP address displayed
 5. Open web browser and navigate to the IP address
+
+### Step 9: Access Web Interface
+
+**First Boot (AP Mode):**
+If no WiFi credentials are set or connection fails:
+1. Device creates WiFi network: `Parola` (password: `parola123`)
+2. Connect to this network
+3. Open browser: `http://192.168.4.1`
+4. Login with: `admin` / `admin`
+5. Configure your WiFi in the WiFi Configuration section
+
+**After WiFi Configuration:**
+1. Find device IP on your network (check Serial Monitor or router)
+2. Open browser: `http://[device-ip]`
+3. Login with: `admin` / `admin`
 
 ## Troubleshooting Installation
 
@@ -118,6 +169,22 @@ const char *adminPass = "your_secure_password";
 - Verify SSID and password
 - Ensure 2.4GHz network (ESP8266 doesn't support 5GHz)
 - Check signal strength
+- Device will automatically start in AP mode if connection fails
+
+**"File Not Found" error in web browser:**
+- Web files not uploaded to LittleFS
+- Solution: Upload data files using **Tools** → **ESP8266 LittleFS Data Upload**
+- Ensure `data/` folder contains: index.html, styles.css, app.js
+
+**"LittleFS mount failed" in Serial Monitor:**
+- Filesystem not formatted or corrupted
+- Solution: Re-upload data files using plugin
+- Check Flash Size has FS space allocated
+
+**LittleFS Plugin not showing in Tools menu:**
+- Plugin not installed correctly
+- Solution: Check `~/Arduino/tools/` contains the plugin folder
+- Restart Arduino IDE after installation
 
 ## Alternative Installation Methods
 
@@ -133,10 +200,20 @@ const char *adminPass = "your_secure_password";
 platform = espressif8266
 board = nodemcuv2
 framework = arduino
+board_build.filesystem = littlefs
 lib_deps = 
     majicdesigns/MD_Parola@^3.7.0
     majicdesigns/MD_MAX72XX@^3.4.0
     arduino-libraries/NTPClient@^3.2.1
+```
+
+Upload filesystem and code:
+```bash
+# Upload web files to filesystem
+pio run --target uploadfs
+
+# Upload sketch
+pio run --target upload
 ```
 
 ### Manual Library Installation
@@ -167,9 +244,20 @@ After successful installation:
    - Login page should appear
    - Dashboard loads after authentication
 
+## Important Notes
+
+⚠️ **Upload Order Matters:**
+1. First: Upload data files (LittleFS)
+2. Then: Upload sketch code
+
+⚠️ **Data files are persistent** - They survive sketch updates
+
+✅ **Only need to upload data files once** - Unless you change HTML/CSS/JS files
+
+✅ **To update only web interface** - Just re-upload data files, no need to reflash sketch
+
 ## Next Steps
 
-- [Configuration Guide](CONFIGURATION.md)
-- [Web Interface Usage](../README.md#web-interface)
-- [API Documentation](API.md)
-- [Troubleshooting](TROUBLESHOOTING.md)
+- [Web Interface Usage](README.md#web-interface)
+- [WiFi Configuration Guide](README.md#-first-time-setup-ap-mode)
+- [API Documentation](README.md#-api-reference)
