@@ -1018,7 +1018,7 @@ void loadSettingsFromEEPROM() {
   settings.wifi_password[sizeof(settings.wifi_password) - 1] = '\0';
 
   // Don't overwrite empty EEPROM with defaults - leave empty to preserve saved credentials
-  // Only set to empty string if EEPROM contains garbage (0xFF) 
+  // Only set to empty string if EEPROM contains garbage (0xFF)
   if (settings.wifi_ssid[0] == 0xFF) {
     settings.wifi_ssid[0] = '\0';
   }
