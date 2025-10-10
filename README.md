@@ -31,58 +31,58 @@
 
 ## 🎯 Overview
 
-This project lets your ESP8266 control an LED matrix display like a boss. Features a web interface, OTA updates, real-time text updates, and more security than your email account. All without breaking your fragile little heart.
+This project lets your ESP8266 control an LED matrix display like a boss. Features a web interface, OTA updates, real-time text updates, and more security than your email account. All without breaking your fragile little heart.  
 
 ### Key Highlights
 
-- **AP Mode**: Because configuring WiFi is too mainstream
-- **Modern Web Interface**: Looks fancy, works… mostly
-- **Secure Authentication**: Login sessions and rate-limits, because hackers exist
-- **Live Updates**: Messages and effects change without your intervention (or consent)
-- **OTA Updates**: Flash firmware without touching your precious ESP8266
-- **Network Resilience**: It tries to reconnect when your WiFi dies, like a clingy ex
+- **AP Mode**: Because configuring WiFi is too mainstream  
+- **Modern Web Interface**: Looks fancy, works… mostly  
+- **Secure Authentication**: Login sessions and rate-limits, because hackers exist  
+- **Live Updates**: Messages and effects change without your intervention (or consent)  
+- **OTA Updates**: Flash firmware without touching your precious ESP8266  
+- **Network Resilience**: It tries to reconnect when your WiFi dies, like a clingy ex  
 
 ## ✨ Features
 
 ### Display Control
 
-- 🖊️ **Live Text Updates** – Type, it shows, no magic involved
-- 🎨 **28 Visual Effects** – Because 1 effect is for quitters
-- 🔧 **Brightness Control** – 15 levels of blinding glory
-- ⚡ **Speed Control** – Slow to insane, your choice
-- 🕐 **Auto Clock** – Because you clearly need reminders
+- 🖊️ **Live Text Updates** – Type, it shows, no magic involved  
+- 🎨 **28 Visual Effects** – Because 1 effect is for quitters  
+- 🔧 **Brightness Control** – 15 levels of blinding glory  
+- ⚡ **Speed Control** – Slow to insane, your choice  
+- 🕐 **Auto Clock** – Because you clearly need reminders  
 
 ### Web Interface
 
 ![Web Interface Preview](https://github.com/sddion/Parola_/blob/main/2025.png)
 
-- 🎨 Material Design UI (fancy icons for fancy people)
-- 📱 Works on mobile, because tiny screens are fun
-- 🔒 Login protected, because trolls exist
-- 👁️ Live status, IP, uptime, SSID, because you need to flex
+- 🎨 Material Design UI (fancy icons for fancy people)  
+- 📱 Works on mobile, because tiny screens are fun  
+- 🔒 Login protected, because trolls exist  
+- 👁️ Live status, IP, uptime, SSID, because you need to flex  
 
 ### Security & Management
 
-- 🛡️ IP rate-limiting – Three wrong logins? See ya for 30s
-- 🔐 Bearer token login – Fancy words, same result
-- ⏱️ Auto logout – So lazy people don’t hog sessions
-- 🧰 OTA Upload – Upgrade firmware without leaving your couch
+- 🛡️ IP rate-limiting – Three wrong logins? See ya for 30s  
+- 🔐 Bearer token login – Fancy words, same result  
+- ⏱️ Auto logout – So lazy people don’t hog sessions  
+- 🧰 OTA Upload – Upgrade firmware without leaving your couch  
 
 ### Network Features
 
-- 🏠 Automatic AP Mode
-- 📶 Auto WiFi Reconnect
-- ⚙️ Web-based WiFi Configuration
-- 🌐 NTP Clock Sync – Because your ESP8266 cares about punctuality
-- 🔍 IP Reporting – Flex your local network
-- 🧩 Fail-safe Display Suspension – Clears screen when disconnected
+- 🏠 Automatic AP Mode  
+- 📶 Auto WiFi Reconnect  
+- ⚙️ Web-based WiFi Configuration  
+- 🌐 NTP Clock Sync – Because your ESP8266 cares about punctuality  
+- 🔍 IP Reporting – Flex your local network  
+- 🧩 Fail-safe Display Suspension – Clears screen when disconnected  
 
 ## 🛠️ Hardware Requirements
 
-- ✅ ESP8266 (NodeMCU, Wemos D1 Mini)
-- ✅ 4x MAX7219 8x8 LED matrix (FC16)
-- ✅ Jumper wires
-- ✅ 5V 2A+ power supply
+- ✅ ESP8266 (NodeMCU, Wemos D1 Mini)  
+- ✅ 4x MAX7219 8x8 LED matrix (FC16)  
+- ✅ Jumper wires  
+- ✅ 5V 2A+ power supply  
 
 | ESP8266 Pin | MAX7219 Pin | Purpose       |
 |-------------|-------------|---------------|
@@ -92,17 +92,17 @@ This project lets your ESP8266 control an LED matrix display like a boss. Featur
 | 3.3V        | VCC         | Power         |
 | GND         | GND         | Ground        |
 
-**Hint:** Mess up wiring, you get… nothing.
+**Hint:** Mess up wiring, you get… nothing.  
 
 ## 🚀 Installation
 
 ### Quick Flash (Pre-compiled `.bin`)
 
-Because why compile when you can download?
+Because why compile when you can download?  
 
-1. Download ESP Flash Tool or esptool.py
-2. Grab the binary: [Direct Download](https://github.com/sddion/Parola_/releases/download/v1/parola_v1.ino.bin)
-3. Flash command:
+1. Download ESP Flash Tool or esptool.py  
+2. Grab the binary: [Direct Download](https://github.com/sddion/Parola_/releases/download/v1/parola_v1.ino.bin)  
+3. Flash command:  
 
 ```bash
 esptool.py --port COM3 --baud 460800 write_flash --flash_size=detect 0 parola_v1.ino.bin
