@@ -1,29 +1,9 @@
-
 /*
- * Parola WiFi Matrix Display Controller
+ * Parola WiFi Matrix Display Controller - Modified for Persistent WiFi
  *
- * Author: @dedsec (GitHub)
- * Project: ESP8266 WiFi LED Matrix Display with Web Interface
- * Description: Professional WiFi-controlled LED matrix display system with
- *
- *
- *              AP mode, web interface, OTA updates, and security features
- *
- * Hardware: ESP8266 + 4x MAX7219 LED Matrix Modules
- * Features: - Automatic AP mode when no WiFi configured
- *           - Modern responsive web interface with Material Design
- *           - 28 visual effects and animations
- *           - Real-time clock display with NTP sync
- *           - Secure authentication with session management
- *           - Over-the-air firmware updates
- *           - EEPROM settings persistence
- *
- * Default Access:
- * - AP Mode: Connect to "Parola" network (password: parola123)
- * - Web Interface: http://192.168.4.1 (admin/admin)
- *
- * Repository: https://github.com/dedsec/Parola_
- * License: MIT
+ * Changes: ESP will NEVER enter AP mode after initial setup
+ *          AP mode only activates if default credentials "..." are present
+ *          During WiFi outages, device waits and retries indefinitely
  */
 
 #include <ArduinoOTA.h>
@@ -873,6 +853,7 @@ const char index_html[] PROGMEM = "<!DOCTYPE html><html lang='en'><head>"
 "};"
 "</script></body></html>";
 
+
 bool isAuthorized() {
   if (!server.hasHeader("Authorization"))
     return false;
@@ -911,7 +892,7 @@ void updateClock() {
     struct tm *tmInfo = localtime(&rawTime);
 
     // Day name
-    static const char* daynames[] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+    static const char* daynames[] = { "Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat" };
     String dayStr = daynames[tmInfo->tm_wday];
 
     // Date in "DD MMM" format, e.g. "15 JUL"
@@ -930,7 +911,7 @@ void updateClock() {
     char ap = (hr < 12) ? 'A' : 'P';
     int dhr = hr % 12; if (dhr == 0) dhr = 12;
     char timeBuf[10];
-    snprintf(timeBuf, sizeof(timeBuf), "%d:%02d %cM", dhr, mn, ap);
+    snprintf(timeBuf, sizeof(timeBuf), "%d:%02d %c", dhr, mn, ap);
 
     lastDayStr = dayStr;
     lastDateStr = String(dateBuf);
@@ -1026,6 +1007,7 @@ void loadSettingsFromEEPROM() {
     settings.wifi_password[0] = '\0';
   }
 }
+
 void setup() {
   Serial.begin(9600);
   delay(100);
@@ -1033,24 +1015,39 @@ void setup() {
   loadSettingsFromEEPROM();
   myDisplay.begin();
 
-  // Check if saved WiFi credentials are valid and different from defaults
+  // Determine WiFi credentials to use
   const char* connectSSID = ssid;
   const char* connectPassword = password;
+  bool hasValidCredentials = false;
 
+  // Check if saved WiFi credentials exist and are valid (not default "...")
   if (strlen(settings.wifi_ssid) > 0 && strcmp(settings.wifi_ssid, "...") != 0) {
     connectSSID = settings.wifi_ssid;
     connectPassword = settings.wifi_password;
+    hasValidCredentials = true;
     Serial.print("Using saved WiFi credentials: ");
     Serial.println(connectSSID);
-  } else if (strcmp(ssid, "...") != 0) {
+  } 
+  // Check if default credentials are valid (not "...")
+  else if (strcmp(ssid, "...") != 0) {
+    hasValidCredentials = true;
     Serial.print("Using default WiFi credentials: ");
     Serial.println(connectSSID);
-  } else {
-    Serial.println("No WiFi credentials available. Starting AP mode.");
+  }
+
+  // CRITICAL: Only enter AP mode if NO valid credentials exist (still at default "...")
+  if (!hasValidCredentials) {
+    Serial.println("No WiFi credentials configured (default '...' detected).");
+    Serial.println("Starting AP mode for initial setup.");
     apMode = true;
+  } else {
+    // Valid credentials exist - NEVER use AP mode, even if connection fails
+    apMode = false;
+    Serial.println("Valid WiFi credentials found. AP mode disabled.");
   }
 
   if (!apMode) {
+    // Station mode - attempt to connect with persistent retry
     WiFi.mode(WIFI_STA);
     WiFi.begin(connectSSID, connectPassword);
     WiFi.setAutoReconnect(true);
@@ -1063,6 +1060,7 @@ void setup() {
     unsigned long startAttemptTime = millis();
     Serial.print("Connecting to WiFi");
 
+    // Initial connection attempt (20 seconds)
     while (WiFi.status() != WL_CONNECTED &&
       millis() - startAttemptTime < 20000) {
       delay(100);
@@ -1070,22 +1068,28 @@ void setup() {
       yield();
     }
 
-    if (WiFi.status() != WL_CONNECTED) {
-      Serial.println("\nWiFi connection failed. Starting AP mode.");
-      apMode = true;
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("\nWiFi connected. IP: " + WiFi.localIP().toString());
+    } else {
+      // Connection failed but credentials exist - stay in STA mode and keep retrying
+      Serial.println("\nInitial WiFi connection failed.");
+      Serial.println("Device will continue attempting to connect in background.");
+      Serial.println("Display disabled until WiFi is restored.");
+      wifiConnected = false;
+      displayDisabled = true;
+      myDisplay.displayClear();
+      myDisplay.displaySuspend(true);
     }
   }
 
+  // Only start AP mode if no valid credentials exist
   if (apMode) {
     WiFi.mode(WIFI_AP);
     WiFi.softAP("Parola", "parola123");
-    Serial.print("AP Mode. IP: ");
+    Serial.print("AP Mode active for initial setup. IP: ");
     Serial.println(WiFi.softAPIP());
   }
 
-  if (!apMode) {
-    Serial.println("\nWiFi connected. IP: " + WiFi.localIP().toString());
-  }
   ArduinoOTA.setHostname("Parola_");
   ArduinoOTA.begin();
   timeClient.begin();
@@ -1270,8 +1274,9 @@ void loop() {
     lastCleanupTime = millis();
   }
   unsigned long now = millis();
+  
+  // WiFi AND Internet watchdog/reconnect logic (only runs when NOT in AP mode)
   if (!apMode && !displayDisabled) {
-    // WiFi AND Internet watchdog/reconnect logic
     static bool internetConnected = true;
     if (now - lastWifiCheck > wifiRetryInterval) {
       lastWifiCheck = now;
@@ -1290,6 +1295,7 @@ void loop() {
         }
         // Try to reconnect WiFi if needed
         if (!wifiOk) {
+          Serial.println("Attempting WiFi reconnection...");
           WiFi.disconnect();
           const char* reconnectSSID = (strlen(settings.wifi_ssid) > 0 && strcmp(settings.wifi_ssid, "...") != 0) ? settings.wifi_ssid : ssid;
           const char* reconnectPassword = (strlen(settings.wifi_ssid) > 0 && strcmp(settings.wifi_ssid, "...") != 0) ? settings.wifi_password : password;
@@ -1309,6 +1315,19 @@ void loop() {
       }
     }
   }
+  
+  // Handle initial connection attempts when display is disabled at startup
+  if (!apMode && displayDisabled && WiFi.status() == WL_CONNECTED) {
+    Serial.println("WiFi connected during background retry.");
+    Serial.println("IP: " + WiFi.localIP().toString());
+    wifiConnected = true;
+    displayDisabled = false;
+    myDisplay.displayClear();
+    myDisplay.displaySuspend(false);
+    applySettings();
+    updateClock();
+  }
+  
   if (!displayDisabled) {
     if (now - lastNtpSync > 40000UL || lastNtpSync == 0) {
       lastNtpSync = now;
